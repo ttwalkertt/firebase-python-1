@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import credentials, firestore
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import ValidationError
+from models import DocumentModel  # Import the Pydantic model
 from typing import Optional, Dict, Any
 
 app = Flask(__name__)
@@ -14,15 +15,6 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 collection_name = 'sample_collection'
-
-class DocumentModel(BaseModel):
-    name: str
-    age: Optional[int] = Field(None, description="Age of the person")
-    # Add other required fields here
-    additional_fields: Dict[str, Any] = Field(default_factory=dict)
-
-    class Config:
-        extra = 'allow'
 
 @app.route('/upsert', methods=['PUT'])
 def upsert_document():
