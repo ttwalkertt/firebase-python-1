@@ -1,3 +1,5 @@
 firebase-admin
 flask
+pydantic
+
 
