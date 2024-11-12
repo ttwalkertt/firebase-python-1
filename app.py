@@ -3,8 +3,8 @@ from firebase_admin import credentials, firestore
 
 # Initialize Firebase
 # Use the application default credentials.
-cred = credentials.ApplicationDefault()
-#cred = credentials.Certificate('/path/to/your/serviceAccountKey.json')
+#cred = credentials.ApplicationDefault()
+cred = credentials.Certificate('./my-first-cloud-storage-test-firebase-adminsdk-g8vb7-8e7132d0a4.json')
 firebase_admin.initialize_app(cred)
 
 # Initialize Firestore
