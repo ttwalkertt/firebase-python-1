@@ -1,32 +1,42 @@
+from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+app = Flask(__name__)
+
 # Initialize Firebase
-# Use the application default credentials.
-#cred = credentials.ApplicationDefault()
 cred = credentials.Certificate('./my-first-cloud-storage-test-firebase-adminsdk-g8vb7-8e7132d0a4.json')
 firebase_admin.initialize_app(cred)
 
 # Initialize Firestore
 db = firestore.client()
 
-# Create a sample collection and add documents
 collection_name = 'sample_collection'
-documents = [
-    {'name': 'Alice', 'age': 30},
-    {'name': 'Bob', 'age': 25},
-    {'name': 'Charlie', 'age': 35}
-]
 
-for doc in documents:
-    db.collection(collection_name).add(doc)
+@app.route('/add', methods=['PUT'])
+def add_document():
+    data = request.json
+    db.collection(collection_name).add(data)
+    return jsonify({"success": True}), 201
 
-# Query the collection for the count of documents
-docs = db.collection(collection_name).stream()
-doc_count = sum(1 for _ in docs)
-print(f'Number of documents in {collection_name}: {doc_count}')
+@app.route('/get/<name>', methods=['GET'])
+def get_document(name):
+    docs = db.collection(collection_name).where('name', '==', name).stream()
+    result = [doc.to_dict() for doc in docs]
+    return jsonify(result), 200
 
-# Get one document
-doc_ref = db.collection(collection_name).limit(1).stream()
-for doc in doc_ref:
-    print(f'Document data: {doc.to_dict()}')
+@app.route('/delete/<name>', methods=['DELETE'])
+def delete_document(name):
+    docs = db.collection(collection_name).where('name', '==', name).stream()
+    for doc in docs:
+        db.collection(collection_name).document(doc.id).delete()
+    return jsonify({"success": True}), 200
+
+@app.route('/list', methods=['GET'])
+def list_documents():
+    docs = db.collection(collection_name).stream()
+    result = [doc.to_dict() for doc in docs]
+    return jsonify(result), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
